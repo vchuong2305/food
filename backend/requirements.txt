@@ -5,3 +5,4 @@ Pillow
 tensorflow
 gdown
 gunicorn
+tf-keras 

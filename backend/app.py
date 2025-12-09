@@ -8,7 +8,7 @@ from PIL import Image, ImageFilter, ImageEnhance
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from tensorflow import keras
+import tf_keras as keras
 import gdown
 
 
