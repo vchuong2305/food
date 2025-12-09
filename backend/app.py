@@ -1,14 +1,14 @@
 import os
 import io
 import base64
-
 import numpy as np
-from PIL import Image, ImageFilter, ImageEnhance
 
+import tensorflow as tf
+import tf_keras as keras
+
+from PIL import Image, ImageFilter, ImageEnhance
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
-import tf_keras as keras
 import gdown
 
 
@@ -17,7 +17,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_FILENAME = "cnn50_100_16_4.h5"
 MODEL_PATH = os.path.join(BASE_DIR, MODEL_FILENAME)
 
-# Set trên Render: MODEL_FILE_ID = "xxxxxxxxxxxxxxxxxxxx"
 MODEL_FILE_ID = os.environ.get("MODEL_FILE_ID", "").strip()
 
 CLASS_LABELS = [
@@ -36,29 +35,25 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ===================== MODEL DOWNLOAD =====================
 def ensure_model_file():
-    """Nếu model chưa tồn tại ở server thì tải từ Google Drive bằng FILE_ID."""
+    """Tải model từ Google Drive nếu chưa có."""
     if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
-        print(f"[OK] Model exists: {MODEL_PATH} ({os.path.getsize(MODEL_PATH)/1024/1024:.2f} MB)")
+        print(f"[OK] Model exists: {MODEL_PATH}")
         return True
 
     if not MODEL_FILE_ID:
-        print("[ERR] Missing MODEL_FILE_ID env. Set it in Render Environment.")
+        print("[ERR] Missing MODEL_FILE_ID")
         return False
 
     url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
-    print(f"[INFO] Downloading model from Google Drive: {url}")
+    print(f"[INFO] Downloading model: {url}")
+
     try:
         gdown.download(url, MODEL_PATH, quiet=False)
     except Exception as e:
         print(f"[ERR] Download failed: {e}")
         return False
 
-    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
-        print(f"[OK] Downloaded model to: {MODEL_PATH} ({os.path.getsize(MODEL_PATH)/1024/1024:.2f} MB)")
-        return True
-
-    print("[ERR] Model file not found after download.")
-    return False
+    return os.path.exists(MODEL_PATH)
 
 
 # ===================== LOAD MODEL =====================
@@ -67,9 +62,10 @@ try:
     if not ensure_model_file():
         raise RuntimeError("Model not available")
 
+    # ⭐⭐ Load model bằng tf_keras như file thứ 2
     model = keras.models.load_model(MODEL_PATH, compile=False)
+
     print(f"[OK] Loaded model: {MODEL_PATH}")
-    print(f"[OK] Num classes: {len(CLASS_LABELS)}")
 except Exception as e:
     print(f"[ERR] Cannot load model: {e}")
     model = None
@@ -86,7 +82,6 @@ def preprocess_image(img: Image.Image, target_size=(224, 224), apply_enhancement
 
     arr = np.array(img, dtype=np.float32)
 
-    # Nếu lỡ có alpha channel
     if arr.ndim == 3 and arr.shape[-1] == 4:
         arr = arr[:, :, :3]
 
@@ -141,13 +136,11 @@ def predict():
         return jsonify({
             "label": str(label),
             "confidence": float(confidence)
-        }), 200
+        })
 
-    except (base64.binascii.Error, IOError):
-        return jsonify({"error": "Dữ liệu ảnh không hợp lệ hoặc bị hỏng"}), 400
     except Exception as e:
-        print(f"[ERR] /predict error: {e}")
-        return jsonify({"error": "Đã xảy ra lỗi không xác định trên server"}), 500
+        print(f"[ERR] Predict error: {e}")
+        return jsonify({"error": "Server error"}), 500
 
 
 if __name__ == "__main__":

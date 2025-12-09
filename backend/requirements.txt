@@ -2,7 +2,7 @@ Flask
 flask-cors
 numpy
 Pillow
-tensorflow
-gdown
+tensorflow==2.20.0
+tf-keras==2.20.1
+keras==3.11.3
 gunicorn
-tf-keras 
