@@ -203,9 +203,9 @@ h1 {
 		function sendImageToServer(imageData, imageType) {
 			statusText.textContent = 'Đang xử lý...';
 			resultLink.style.display = 'none';
-
+            const API_URL = "https://food-a8te.onrender.com/predict";
 			$.ajax({
-				url: ' http://10.10.52.188:5000/predict',
+				url: API_URL,
 				method: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({ image: imageData.split(',')[1], image_type: imageType }),
