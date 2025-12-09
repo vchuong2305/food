@@ -1,0 +1,633 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>FoodCare - Dinh dưỡng &amp; sức khỏe món ăn</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Xem nhanh calo, thành phần dinh dưỡng và gợi ý sức khỏe cho các món ăn Việt Nam." />
+	<meta name="keywords" content="dinh dưỡng, calo, món ăn Việt Nam, bệnh lý, giảm cân, tăng cơ" />
+	<meta name="author" content="FoodCare" />
+
+	<link rel="stylesheet" href="css/animate.css">
+	<link rel="stylesheet" href="css/icomoon.css">
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/flexslider.css">
+	<link rel="stylesheet" href="css/owl.carousel.min.css">
+	<link rel="stylesheet" href="css/owl.theme.default.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/modernizr-2.6.2.min.js"></script>
+
+	<style>
+		/* Custom cho phần dinh dưỡng & hồ sơ sức khỏe */
+		.health-pill {
+			display: inline-block;
+			padding: 4px 10px;
+			border-radius: 999px;
+			font-size: 11px;
+			margin: 2px;
+			background: #f7f7f7;
+			border: 1px solid #eee;
+		}
+		.health-pill--good {
+			background: #e6f7ec;
+			border-color: #b6e3c4;
+			color: #2f7c4f;
+		}
+		.health-pill--warn {
+			background: #fff4e6;
+			border-color: #ffd39b;
+			color: #b5621a;
+		}
+		.health-pill--alert {
+			background: #ffe9e9;
+			border-color: #ffb1b1;
+			color: #b22525;
+		}
+
+		.health-section {
+			background: linear-gradient(135deg,#f7fdf9,#ffffff);
+			border-radius: 10px;
+			padding: 20px 25px;
+			margin-bottom: 30px;
+			box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+			border-left: 4px solid #2f7c4f;
+		}
+		.health-section h3 {
+			margin-top: 0;
+			margin-bottom: 8px;
+			font-weight: 600;
+		}
+		.health-section label {
+			font-size: 13px;
+			font-weight: 500;
+		}
+		.health-section select.form-control {
+			height: 32px;
+			font-size: 13px;
+		}
+		.health-summary {
+			font-size: 13px;
+			color: #555;
+			margin-top: 5px;
+		}
+
+		#healthAdvice {
+			margin-top: 12px;
+			padding-top: 10px;
+			border-top: 1px dashed #d8d8d8;
+			font-size: 13px;
+			color: #333;
+		}
+		#healthAdvice::before {
+			content: "💡 Gợi ý tổng quát:";
+			display: block;
+			font-weight: 600;
+			margin-bottom: 3px;
+			color: #2f7c4f;
+		}
+
+		.health-tag {
+			display: inline-block;
+			padding: 3px 8px;
+			border-radius: 999px;
+			font-size: 11px;
+			margin-right: 5px;
+			margin-bottom: 5px;
+			background: #f0f0f0;
+		}
+		.health-tag--cal-low  { background: #e6f7ff; color: #006b99; }
+		.health-tag--cal-med  { background: #fff8e6; color: #996a00; }
+		.health-tag--cal-high { background: #ffe6e6; color: #991b1b; }
+
+		/* Hiệu ứng nhẹ cho product khi lọc */
+		.product {
+			transition: all 0.2s ease;
+		}
+	</style>
+</head>
+<body>
+	
+<div class="fh5co-loader"></div>
+
+<div id="page">
+	<nav class="fh5co-nav" role="navigation">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3 col-xs-2">
+					<div id="fh5co-logo"><a href="index.html">FoodCare</a></div>
+				</div>
+				<div class="col-md-6 col-xs-6 text-center menu-1">
+					<ul>
+						<li><a href="index.html">Trang chủ</a></li>
+						<li class="active"><a href="product.html">Dinh dưỡng món ăn</a></li>
+					</ul>
+				</div>
+				<div class="col-md-3 col-xs-4 text-right hidden-xs menu-2">
+					<ul>
+						<li>
+							<a href="snaphot.html" title="Chụp hoặc tải ảnh món ăn">
+								<button id="camera-btn" class="btn btn-primary">
+									<i class="icon-camera"></i> Nhận diện món ăn
+								</button>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			
+		</div>
+	</nav>
+
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url(img/home/amthuc2.png);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1 style="color:#fff;">Dinh dưỡng &amp; sức khỏe món ăn</h1>
+							<p style="color:#f5f5f5; margin-top:10px;">
+								Xem nhanh calo, thành phần chính và gợi ý sức khỏe cho từng món.
+								Kết hợp với chức năng nhận diện ảnh để kiểm soát chế độ ăn mỗi ngày.
+							</p>
+							<p style="color:#dedede; font-size:12px; margin-top:8px;">
+								<em>Thông tin mang tính tham khảo, không thay thế tư vấn của bác sĩ/chuyên gia dinh dưỡng.</em>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	
+	<div id="fh5co-product">
+		<div class="container">
+			<!-- HỒ SƠ SỨC KHỎE NGƯỜI DÙNG -->
+			<div class="row animate-box">
+				<div class="col-md-10 col-md-offset-1">
+					<div class="health-section">
+						<h3><i class="icon-user"></i> Hồ sơ sức khỏe nhanh</h3>
+						<p class="health-summary">
+							Chọn <b>mục tiêu</b> và <b>bệnh lý đang quan tâm</b>. 
+							Gợi ý bên dưới sẽ hiển thị lời khuyên tổng quát, đồng thời danh sách món ở dưới sẽ lọc bớt những lựa chọn không phù hợp.
+						</p>
+						<div class="row" style="margin-top:15px;">
+							<div class="col-sm-4">
+								<label for="goalSelect">Mục tiêu dinh dưỡng</label>
+								<select id="goalSelect" class="form-control input-sm">
+									<option value="">-- Chọn mục tiêu --</option>
+									<option value="loss">Giảm cân / giữ dáng</option>
+									<option value="muscle">Tăng cơ / vận động nhiều</option>
+									<option value="lowcarb">Hạn chế tinh bột (low-carb)</option>
+									<option value="clean">Ăn lành mạnh (eat clean)</option>
+								</select>
+							</div>
+							<div class="col-sm-8">
+								<label>Bệnh lý / nguy cơ sức khỏe</label>
+								<div style="font-size:13px; margin-top:4px;">
+									<label style="margin-right:15px;">
+										<input type="checkbox" class="health-cond" value="dm"> Đái tháo đường
+									</label>
+									<label style="margin-right:15px;">
+										<input type="checkbox" class="health-cond" value="tha"> Tăng huyết áp
+									</label>
+									<label style="margin-right:15px;">
+										<input type="checkbox" class="health-cond" value="rlmm"> Rối loạn mỡ máu
+									</label>
+									<label style="margin-right:15px;">
+										<input type="checkbox" class="health-cond" value="bp"> Thừa cân / béo phì
+									</label>
+								</div>
+							</div>
+						</div>
+						<div id="healthAdvice" class="health-summary"></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- LƯỚI CÁC MÓN ĂN -->
+			<div class="row animate-box">
+				<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
+					<h2>Danh sách món ăn &amp; tóm tắt dinh dưỡng</h2>
+					<p>
+						Mỗi món bên dưới có mô tả ngắn về <b>calo ước tính</b> và <b>đặc điểm dinh dưỡng</b>.  
+						Thông tin chi tiết hơn (bảng thành phần, gợi ý khẩu phần, văn hóa vùng miền)
+						được trình bày trong từng trang món ăn.
+					</p>
+				</div>
+			</div>
+
+			<!-- Hàng 1 -->
+			<div class="row">
+				<!-- Bánh Bèo -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="low" data-carbs="high" data-fat="low" data-salt="low">
+						<div class="product-grid" style="background-image:url(img/home/banhbeo1.png);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhbeo.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhbeo.html">Bánh Bèo</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-low">Calo thấp–trung bình</span>
+								<span class="health-tag">Giàu tinh bột</span>
+								<span class="health-tag">Ít chất béo</span>
+							</div>
+							<p class="small">
+								Ước tính ~150–200 kcal/đĩa nhỏ. Phù hợp bữa ăn nhẹ, 
+								nhưng người <b>đái tháo đường</b> vẫn cần để ý số lượng đĩa ăn.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Bánh Chưng -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="high" data-carbs="high" data-fat="med" data-salt="med">
+						<div class="product-grid" style="background-image:url(img/home/banhchung.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhchung.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhchung.html">Bánh Chưng</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-high">Calo cao</span>
+								<span class="health-tag">Giàu tinh bột</span>
+								<span class="health-tag">Có chất béo bão hòa</span>
+							</div>
+							<p class="small">
+								~300–400 kcal/miếng. Cần hạn chế với người <b>béo phì, rối loạn mỡ máu, đái tháo đường</b>.
+								Nên ăn kèm rau luộc, giảm đồ chiên mỡ đi kèm.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Bánh Cuốn -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="med" data-carbs="high" data-fat="low" data-salt="low">
+						<div class="product-grid" style="background-image:url(img/cate/banhcuon/banhcuon1.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhcuon.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhcuon.html">Bánh Cuốn</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-med">Calo trung bình</span>
+								<span class="health-tag">Nhiều tinh bột</span>
+								<span class="health-tag">Ít chất béo (nếu giảm mỡ hành)</span>
+							</div>
+							<p class="small">
+								~250–300 kcal/phần. Hợp cho bữa sáng nhẹ. 
+								Người muốn <b>giảm cân</b> nên ăn ít bánh, tăng lượng rau kèm.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Hàng 2 -->
+			<div class="row">
+				<!-- Bánh Mì -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="high" data-carbs="high" data-fat="high" data-salt="med">
+						<div class="product-grid" style="background-image:url(img/cate/banhmi/banhmi1.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhmy.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhmy.html">Bánh Mì</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-high">Calo cao</span>
+								<span class="health-tag">Tinh bột nhanh</span>
+								<span class="health-tag">Thường nhiều mỡ (pate, mayo)</span>
+							</div>
+							<p class="small">
+								~350–500 kcal/ổ. Người <b>giảm cân, rối loạn mỡ máu</b> nên 
+								giảm pate/mayo, tăng rau, chọn nhân thịt nạc/grilled.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Bánh Tráng Nướng -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="med" data-carbs="med" data-fat="high" data-salt="med">
+						<div class="product-grid" style="background-image:url(img/cate/banhtrangnuong/banhtrangnuong1.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhtrangnuong.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhtrangnuong.html">Bánh Tráng Nướng</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-med">Calo vừa</span>
+								<span class="health-tag">Snack đường phố</span>
+								<span class="health-tag">Nhiều chất béo &amp; natri</span>
+							</div>
+							<p class="small">
+								Phù hợp như món ăn chơi thỉnh thoảng. 
+								Người <b>tăng huyết áp, tim mạch</b> nên hạn chế tần suất.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Bánh Xèo -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="high" data-carbs="med" data-fat="high" data-salt="low">
+						<div class="product-grid" style="background-image:url(img/cate/banhxeo/banhxeo1.jpeg);">
+							<div class="inner">
+								<p>
+									<a href="singlebanhxeo.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebanhxeo.html">Bánh Xèo</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-high">Calo cao (do chiên)</span>
+								<span class="health-tag">Giàu chất béo</span>
+								<span class="health-tag">Ăn kèm nhiều rau sống</span>
+							</div>
+							<p class="small">
+								Người <b>béo phì, rối loạn mỡ máu</b> nên hạn chế số lượng bánh,
+								ưu tiên nhiều rau, ít nước chấm ngọt.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Hàng 3 -->
+			<div class="row">
+				<!-- Bún Đậu Mắm Tôm -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="high" data-carbs="high" data-fat="high" data-salt="high">
+						<div class="product-grid" style="background-image:url(img/cate/bundaumamtom/bundaumantom3.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlebundaumamtom.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlebundaumamtom.html">Bún Đậu Mắm Tôm</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-high">Calo cao</span>
+								<span class="health-tag">Nhiều chất béo (chiên, ba chỉ)</span>
+								<span class="health-tag">Mắm tôm mặn</span>
+							</div>
+							<p class="small">
+								Cực kỳ “ngon miệng” nhưng không thân thiện lắm với
+								<b>tăng huyết áp, rối loạn mỡ máu, béo phì</b>. 
+								Chỉ nên ăn thỉnh thoảng và chọn ít đồ chiên.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Cá Kho Tộ -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="med" data-carbs="low" data-fat="med" data-salt="high">
+						<div class="product-grid" style="background-image:url(img/cate/cakhoto/cakhoto2.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlecakhoto.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlecakhoto.html">Cá Kho Tộ</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-med">Calo trung bình</span>
+								<span class="health-tag">Giàu đạm</span>
+								<span class="health-tag">Thường nhiều muối</span>
+							</div>
+							<p class="small">
+								Phù hợp nếu <b>giảm mặn</b> và ăn kèm nhiều rau, 
+								hạn chế chan nước kho vào cơm để giảm natri.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- Phở -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="med" data-carbs="high" data-fat="med" data-salt="med">
+						<div class="product-grid" style="background-image:url(img/cate/pho/pho2.jpg);">
+							<div class="inner">
+								<p>
+									<a href="singlepho.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlepho.html">Phở</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-med">Calo trung bình</span>
+								<span class="health-tag">Giàu tinh bột &amp; đạm</span>
+								<span class="health-tag">Có thể nhiều mỡ nếu nhiều nước béo</span>
+							</div>
+							<p class="small">
+								Người <b>giảm cân</b> có thể xin ít bánh phở, 
+								<b>tim mạch</b> nên bỏ bớt nước béo, thêm rau thơm &amp; giá.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Hàng 4 -->
+			<div class="row">
+				<!-- Xôi Xéo -->
+				<div class="col-md-4 text-center animate-box">
+					<div class="product" data-cal="high" data-carbs="high" data-fat="high" data-salt="low">
+						<div class="product-grid" style="background-image:url(img/cate/xoixeo/xoi2.jpeg);">
+							<div class="inner">
+								<p>
+									<a href="singlexoixeo.html" class="icon"><i class="icon-eye"></i></a>
+								</p>
+							</div>
+						</div>
+						<div class="desc">
+							<h3><a href="singlexoixeo.html">Xôi Xéo</a></h3>
+							<div>
+								<span class="health-tag health-tag--cal-high">Calo cao</span>
+								<span class="health-tag">Nhiều tinh bột</span>
+								<span class="health-tag">Nhiều mỡ (hành phi, mỡ hành)</span>
+							</div>
+							<p class="small">
+								Người <b>đái tháo đường, béo phì</b> nên hạn chế.
+								Nếu ăn, ưu tiên khẩu phần nhỏ và giảm lượng mỡ hành.
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- chỗ trống để sau này thêm món khác -->
+			</div>
+		</div>
+	</div>
+
+	<footer id="fh5co-footer" role="contentinfo">
+		<div class="container">
+			<div class="row row-pb-md">
+				<div class="col-md-4 fh5co-widget">
+					<h3>FoodCare</h3>
+					<p>
+						Ứng dụng giúp bạn nhìn món ăn dưới góc độ dinh dưỡng:
+						calo, chất đa lượng và khuyến nghị theo bệnh lý thường gặp.
+					</p>
+				</div>
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#">Giới thiệu</a></li>
+						<li><a href="#">Cách sử dụng</a></li>
+						<li><a href="#">Liên hệ</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#">Dinh dưỡng tim mạch</a></li>
+						<li><a href="#">Dinh dưỡng tiểu đường</a></li>
+						<li><a href="#">Giảm cân khoa học</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#">FAQ</a></li>
+						<li><a href="#">Tài liệu tham khảo</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="row copyright">
+				<div class="col-md-12 text-center">
+					<p>
+						<small class="block">&copy; 2025 FoodCare. Template gốc FreeHTML5.co</small>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</footer>
+</div>
+
+<div class="gototop js-top">
+	<a href="#" class="js-gotop"><i class="icon-arrow-up"></i></a>
+</div>
+
+<!-- jQuery -->
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.easing.1.3.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.waypoints.min.js"></script>
+<script src="js/owl.carousel.min.js"></script>
+<script src="js/jquery.countTo.js"></script>
+<script src="js/jquery.flexslider-min.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+	// Lọc món ăn theo mục tiêu & bệnh lý + gợi ý tổng quát
+	function updateProductFilter(goal, conds) {
+		var cards = document.querySelectorAll('.product');
+
+		cards.forEach(function(card) {
+			var cal   = card.getAttribute('data-cal')   || '';
+			var carbs = card.getAttribute('data-carbs') || '';
+			var fat   = card.getAttribute('data-fat')   || '';
+			var salt  = card.getAttribute('data-salt')  || '';
+
+			// Nếu không chọn gì thì hiện tất cả
+			if (!goal && conds.length === 0) {
+				card.style.display = '';
+				return;
+			}
+
+			var show = true;
+
+			// Lọc theo mục tiêu
+			if (goal === 'loss' && cal === 'high') {
+				show = false; // giảm cân: tránh calo cao
+			}
+			if (goal === 'lowcarb' && carbs === 'high') {
+				show = false; // low-carb: tránh tinh bột cao
+			}
+			if (goal === 'clean' && fat === 'high') {
+				show = false; // eat clean: tránh nhiều chiên rán
+			}
+			// goal === 'muscle' tạm thời không lọc, chỉ gợi ý text
+
+			// Lọc theo bệnh lý
+			if (conds.indexOf('dm')  !== -1 && carbs === 'high') show = false; // ĐTĐ: tránh tinh bột cao
+			if (conds.indexOf('tha') !== -1 && salt  === 'high') show = false; // THA: tránh mặn
+			if (conds.indexOf('rlmm')!== -1 && fat   === 'high') show = false; // RL mỡ máu: tránh nhiều mỡ
+			if (conds.indexOf('bp')  !== -1 && cal   === 'high') show = false; // Béo phì: tránh calo cao
+
+			card.style.display = show ? '' : 'none';
+		});
+	}
+
+	function updateHealthAdvice() {
+		var goal = document.getElementById('goalSelect').value;
+		var conds = Array.from(document.querySelectorAll('.health-cond:checked')).map(function(c){ return c.value; });
+		var advice = [];
+
+		if (!goal && conds.length === 0) {
+			document.getElementById('healthAdvice').innerHTML =
+				'Chọn mục tiêu và bệnh lý để xem gợi ý tổng quát khi lựa chọn món ăn.';
+			// Hiện lại tất cả món
+			updateProductFilter('', []);
+			return;
+		}
+
+		// Gợi ý theo mục tiêu
+		if (goal === 'loss') {
+			advice.push('• Ưu tiên các món calo thấp–trung bình, hạn chế món chiên, nhiều chất béo.');
+		} else if (goal === 'muscle') {
+			advice.push('• Tập trung vào các món giàu đạm (cá, thịt nạc), kết hợp tinh bột vừa phải và rau xanh.');
+		} else if (goal === 'lowcarb') {
+			advice.push('• Hạn chế các món nhiều tinh bột như xôi, bánh chưng, xôi xéo, bún, phở.');
+		} else if (goal === 'clean') {
+			advice.push('• Ưu tiên món ít chiên rán, nhiều rau xanh, hạn chế sốt béo và đường tinh luyện.');
+		}
+
+		// Gợi ý theo bệnh lý
+		if (conds.indexOf('dm') !== -1) {
+			advice.push('• Đái tháo đường: kiểm soát chặt tổng lượng tinh bột, tránh ăn nhiều xôi, bún, phở cùng lúc.');
+		}
+		if (conds.indexOf('tha') !== -1) {
+			advice.push('• Tăng huyết áp: hạn chế món nhiều muối, mắm (bún đậu mắm tôm, cá kho mặn, nước dùng mặn).');
+		}
+		if (conds.indexOf('rlmm') !== -1) {
+			advice.push('• Rối loạn mỡ máu: giảm món nhiều mỡ động vật, chiên rán (bánh xèo, xôi nhiều mỡ, đồ chiên).');
+		}
+		if (conds.indexOf('bp') !== -1) {
+			advice.push('• Thừa cân/béo phì: chú ý tổng calo/ngày, hạn chế các món calo cao trong cùng một bữa.');
+		}
+
+		document.getElementById('healthAdvice').innerHTML = advice.join('<br>');
+		updateProductFilter(goal, conds);
+	}
+
+	document.getElementById('goalSelect').addEventListener('change', updateHealthAdvice);
+	Array.from(document.querySelectorAll('.health-cond')).forEach(function (cb) {
+		cb.addEventListener('change', updateHealthAdvice);
+	});
+	// Khởi tạo mặc định
+	updateHealthAdvice();
+</script>
+
+</body>
+</html>

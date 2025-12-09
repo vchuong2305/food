@@ -1,0 +1,242 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Chụp Ảnh hoặc Tải File</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+/* Toàn bộ trang */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #8E44AD, #3498DB);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #FFF;
+}
+
+/* Container chính */
+#camera-container, #upload-container {
+    background-color: #FFFFFF;
+    border-radius: 15px;
+    padding: 30px;
+    width: 350px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+#camera-container:hover, #upload-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Video element (camera) */
+video {
+    width: 100%;
+    border-radius: 10px;
+    border: 3px solid #3498DB;
+    margin-bottom: 15px;
+}
+
+/* Canvas (ẩn đi) */
+canvas {
+    display: none;
+}
+
+/* Nút chụp ảnh */
+button#capture-btn, button {
+    background-color: #3498DB;
+    color: #FFF;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button#capture-btn:hover, button:hover {
+    background-color: #1D6FA5;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Upload container */
+#upload-container {
+    text-align: center;
+}
+
+input[type="file"] {
+    display: block;
+    margin: 15px auto;
+    font-size: 14px;
+    padding: 8px;
+    border: 2px dashed #3498DB;
+    border-radius: 8px;
+    background-color: #F7F7F7;
+    color: #666;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+input[type="file"]:hover {
+    border-color: #1D6FA5;
+    background-color: #EAF3FA;
+}
+
+/* Heading */
+h1 {
+    color: #FFF;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 30px;
+}
+
+/* Kết quả hiển thị */
+#result {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#status {
+    font-size: 16px;
+    color: #FFF;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#result-link {
+    margin-top: 10px;
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #E67E22;
+    color: #FFF;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#result-link:hover {
+    background-color: #D35400;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Bố cục chính */
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chụp ảnh hoặc tải file món ăn</h1>
+        <div id="camera-container">
+            <video id="video" autoplay></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <button id="capture-btn">Chụp Ảnh</button>
+        </div>
+    
+        <div id="upload-container">
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+    
+        <div id="result">
+            <p id="status"></p>
+            <a id="result-link" href="#" style="display: none;">Truy cập trang thông tin món ăn</a>
+        </div>
+    </div>
+
+	<script>
+		// Camera logic
+		const video = document.getElementById('video');
+		const canvas = document.getElementById('canvas');
+		const captureBtn = document.getElementById('capture-btn');
+		const fileInput = document.getElementById('file-input');
+		const statusText = document.getElementById('status');
+		const resultLink = document.getElementById('result-link');
+
+		// Start camera
+		navigator.mediaDevices.getUserMedia({ video: true })
+			.then((stream) => {
+				video.srcObject = stream;
+			})
+			.catch((err) => console.error('Camera không khả dụng:', err));
+
+		// Capture photo
+		captureBtn.addEventListener('click', () => {
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+			const imageData = canvas.toDataURL('image/png');
+			sendImageToServer(imageData, 'screenshot');
+		});
+
+		// Upload file
+		fileInput.addEventListener('change', (event) => {
+			const file = event.target.files[0];
+			const reader = new FileReader();
+
+			reader.onload = function(e) {
+				const imageData = e.target.result;
+				sendImageToServer(imageData, 'file');
+			};
+
+			reader.readAsDataURL(file);
+		});
+
+		// Send image to server
+		function sendImageToServer(imageData, imageType) {
+			statusText.textContent = 'Đang xử lý...';
+			resultLink.style.display = 'none';
+
+			$.ajax({
+				url: ' http://10.10.52.188:5000/predict',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ image: imageData.split(',')[1], image_type: imageType }),
+				success: function(response) {
+					if (response.label === 'not found') {
+						statusText.textContent = 'Không nhận diện được món ăn, vui lòng thử lại.';
+					} else {
+						statusText.textContent = `Dự đoán: ${response.label}`;
+						const linkMap = {
+							'Banh beo': 'singlebanhbeo.html',
+							'Banh chung': 'singlebanhchung.html',
+							'Banh cuon': 'singlebanhcuon.html',
+							'Banh mi': 'singlebanhmy.html',
+							'Banh trang nuong': 'singlebanhtrangnuong.html',
+							'Banh xeo': 'singlebanhxeo.html',
+							'Bun dau mam tom': 'singlebundaumamtom.html',
+							'Ca kho to': 'singlecakhoto.html',
+							'Pho': 'singlepho.html',
+							'Xoi xeo': 'singlexoixeo.html'
+						};
+
+						if (linkMap[response.label]) {
+                            window.location.href = linkMap[response.label];
+						}
+					}
+				},
+				error: function() {
+					statusText.textContent = 'Lỗi khi gửi ảnh đến server, vui lòng thử lại.';
+				}
+			});
+		}
+	</script>
+</body>
+</html>
