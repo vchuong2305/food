@@ -1,6 +1,7 @@
 import os
 import io
 import base64
+
 import numpy as np
 from PIL import Image, ImageFilter, ImageEnhance
 
@@ -11,27 +12,13 @@ from tensorflow import keras
 import gdown
 
 
-
+# ===================== CONFIG =====================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "cnn50_100_16_4.h5")
-# set trên Render env, ví dụ: MODEL_FILE_ID=1AbC...
+MODEL_FILENAME = "cnn50_100_16_4.h5"
+MODEL_PATH = os.path.join(BASE_DIR, MODEL_FILENAME)
+
+# Set trên Render: MODEL_FILE_ID = "xxxxxxxxxxxxxxxxxxxx"
 MODEL_FILE_ID = os.environ.get("MODEL_FILE_ID", "").strip()
-
-def ensure_model():
-    if os.path.exists(MODEL_PATH):
-        print("[OK] Model already exists locally.")
-        return True
-
-    if not MODEL_FILE_ID:
-        print("[ERR] Missing MODEL_FILE_ID env.")
-        return False
-
-    url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
-    print("[INFO] Downloading model from Google Drive...")
-    gdown.download(url, MODEL_PATH, quiet=False)
-    ok = os.path.exists(MODEL_PATH)
-    print("[OK] Download done." if ok else "[ERR] Download failed.")
-    return ok
 
 CLASS_LABELS = [
     "Banh beo", "Banh chung", "Banh cuon", "Banh mi",
@@ -42,15 +29,44 @@ CLASS_LABELS = [
 CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 98))
 
 
+# ===================== APP =====================
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
+# ===================== MODEL DOWNLOAD =====================
+def ensure_model_file():
+    """Nếu model chưa tồn tại ở server thì tải từ Google Drive bằng FILE_ID."""
+    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
+        print(f"[OK] Model exists: {MODEL_PATH} ({os.path.getsize(MODEL_PATH)/1024/1024:.2f} MB)")
+        return True
+
+    if not MODEL_FILE_ID:
+        print("[ERR] Missing MODEL_FILE_ID env. Set it in Render Environment.")
+        return False
+
+    url = f"https://drive.google.com/uc?id={MODEL_FILE_ID}"
+    print(f"[INFO] Downloading model from Google Drive: {url}")
+    try:
+        gdown.download(url, MODEL_PATH, quiet=False)
+    except Exception as e:
+        print(f"[ERR] Download failed: {e}")
+        return False
+
+    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) > 0:
+        print(f"[OK] Downloaded model to: {MODEL_PATH} ({os.path.getsize(MODEL_PATH)/1024/1024:.2f} MB)")
+        return True
+
+    print("[ERR] Model file not found after download.")
+    return False
+
+
+# ===================== LOAD MODEL =====================
 model = None
 try:
-    if not ensure_model():
+    if not ensure_model_file():
         raise RuntimeError("Model not available")
-    
+
     model = keras.models.load_model(MODEL_PATH, compile=False)
     print(f"[OK] Loaded model: {MODEL_PATH}")
     print(f"[OK] Num classes: {len(CLASS_LABELS)}")
@@ -59,6 +75,7 @@ except Exception as e:
     model = None
 
 
+# ===================== UTILS =====================
 def preprocess_image(img: Image.Image, target_size=(224, 224), apply_enhancements=False):
     img = img.resize(target_size)
 
@@ -67,13 +84,14 @@ def preprocess_image(img: Image.Image, target_size=(224, 224), apply_enhancement
         img = ImageEnhance.Brightness(img).enhance(1.2)
         img = img.filter(ImageFilter.SHARPEN)
 
-    img_array = np.array(img, dtype=np.float32)
+    arr = np.array(img, dtype=np.float32)
 
-    if img_array.ndim == 3 and img_array.shape[-1] == 4:
-        img_array = img_array[:, :, :3]
+    # Nếu lỡ có alpha channel
+    if arr.ndim == 3 and arr.shape[-1] == 4:
+        arr = arr[:, :, :3]
 
-    img_array = np.expand_dims(img_array, axis=0) / 255.0
-    return img_array
+    arr = np.expand_dims(arr, axis=0) / 255.0
+    return arr
 
 
 def get_prediction(img_array, confidence_threshold=98):
@@ -95,7 +113,7 @@ def get_prediction(img_array, confidence_threshold=98):
     return label, confidence
 
 
-# ====== ROUTES ======
+# ===================== ROUTES =====================
 @app.route("/", methods=["GET"])
 def health():
     return "OK", 200
@@ -111,8 +129,8 @@ def predict():
         return jsonify({"error": 'Thiếu trường "image" trong request'}), 400
 
     try:
-        img_data = base64.b64decode(data["image"])
-        img = Image.open(io.BytesIO(img_data)).convert("RGB")
+        img_bytes = base64.b64decode(data["image"])
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
 
         img_type = data.get("image_type", "file")
         use_enhancements = (img_type == "screenshot")
@@ -133,6 +151,5 @@ def predict():
 
 
 if __name__ == "__main__":
-    # ✅ Render/Cloud dùng PORT env
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
